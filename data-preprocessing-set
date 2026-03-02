@@ -1,0 +1,76 @@
+import pandas as pd
+import numpy as np
+
+ 1. LOAD DATA
+df = pd.read_csv("salary_data.csv")
+print("\nInitial Shape:", df.shape)
+
+ 2. CLEAN COLUMN NAMES
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+print("\nColumns:")
+print(df.columns)
+
+ 3. CHECK DATA TYPES
+print("\nData Info:")
+print(df.info())
+
+ 4. CLEAN SALARY COLUMN
+df['salary'] = df['salary'].replace(r'[₹,]', '', regex=True)
+df['salary'] = pd.to_numeric(df['salary'], errors='coerce')
+df['salary'] = df['salary'].fillna(df['salary'].median())
+
+ 5. REMOVE ROWS WITH OTHER MISSING VALUES
+df.dropna(inplace=True)
+print("\nMissing values after cleaning:")
+print(df.isnull().sum())
+
+ 6. REMOVE OUTLIERS (IQR METHOD)
+Q1 = df['salary'].quantile(0.25)
+Q3 = df['salary'].quantile(0.75)
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+df = df[(df['salary'] >= lower) & (df['salary'] <= upper)]
+df = df[df['salary'] >= 10000]
+
+print("\nAfter Outlier Removal Shape:", df.shape)
+
+ 7. STANDARDIZE GENDER
+df['gender'] = df['gender'].str.strip().str.lower()
+df['gender'] = df['gender'].replace({'m': 'male', 'f': 'female'})
+df = df[df['gender'].isin(['male', 'female'])]
+
+print("\nGender categories:")
+print(df['gender'].unique())
+
+ 8. STANDARDIZE EDUCATION
+df['education_level'] = df['education_level'].str.strip().str.lower()
+df['education_level'] = df['education_level'].replace({
+    "bachelor's": "bachelors",
+    "bachelor's degree": "bachelors",
+    "bachelor degree": "bachelors",
+    "master's": "masters",
+    "master's degree": "masters",
+    "high school": "high_school",
+    "phd": "phd"
+})
+
+print("\nEducation categories:")
+print(df['education_level'].unique())
+
+ 9. REMOVE DUPLICATES
+print("\nDuplicates before:", df.duplicated().sum())
+df.drop_duplicates(inplace=True)
+print("Duplicates after:", df.duplicated().sum())
+
+10. FINAL DATA CHECK
+print("\nFinal Dataset Info:")
+print(df.info())
+
+print("\nFinal Statistics:")
+print(df.describe())
+
+df.to_csv("cleaned_salary_dataset_v1.csv", index=False)
+print("\nCleaned dataset saved successfully!")

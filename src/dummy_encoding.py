@@ -14,12 +14,16 @@ print("\nGender after encoding:")
 print(df['gender'].unique())
 
 # STEP 3: One-Hot Encode Education Level
+# Using drop_first=True to avoid dummy variable trap (multicollinearity)
 df = pd.get_dummies(df, columns=['education_level'], drop_first=True)
+
+print("\nEducation encoding completed successfully.")
 
 print("\nColumns after education encoding:")
 print(df.columns)
 
 # STEP 4: Save encoded dataset
 df.to_csv("final_encoded_dataset.csv", index=False)
+
 
 print("\nDummy encoding completed successfully!")
